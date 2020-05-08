@@ -54,7 +54,7 @@ This package supports the following scenarios:
     };
 
     my $services = {
-      logger => {
+      mojo_log => {
         package => 'Mojo/Log',
         argument => {
           path => { '$metadata' => 'applog' },
@@ -127,7 +127,7 @@ building objects and values.
     use Rewire;
 
     my $services = {
-      mojodate => {
+      mojo_date => {
         package => 'Mojo/Date',
         constructor => 'new'
       }
@@ -145,7 +145,7 @@ routine. A constructor is always called with the package name as the invocant.
     use Rewire;
 
     my $services = {
-      foosum => {
+      foo_sum => {
         package => 'Mojo/Util',
         function => 'md5_sum',
         argument => 'foo',
@@ -215,20 +215,16 @@ construction of multiple services.
 
     use Rewire;
 
-    my $metadata = {
-      website => 'https://perl.org'
-    };
-
     my $services = {
-      mojourl => {
+      mojo_url => {
         package => 'Mojo/URL',
+        argument => 'https://perl.org',
         method => 'new'
       }
     };
 
     my $rewire = Rewire->new(
       services => $services,
-      metadata => $metadata
     );
 
 This package supports specifying construction as a method call, which when
@@ -238,20 +234,16 @@ called provides the package or object instance as the invocant.
 
     use Rewire;
 
-    my $metadata = {
-      website => 'https://perl.org'
-    };
-
     my $services = {
-      mojourl => {
+      mojo_url => {
         package => 'Mojo/URL',
+        argument => 'https://perl.org',
         routine => 'new'
       }
     };
 
     my $rewire = Rewire->new(
       services => $services,
-      metadata => $metadata
     );
 
 This package supports specifying construction as a function call, which when
@@ -360,18 +352,18 @@ Copyright (C) 2011-2019, Al Newkirk, et al.
 
 This is free software; you can redistribute it and/or modify it under the terms
 of the The Apache License, Version 2.0, as elucidated in the ["license
-file"](https://github.com/iamalnewkirk/foobar/blob/master/LICENSE).
+file"](https://github.com/iamalnewkirk/rewire/blob/master/LICENSE).
 
 # PROJECT
 
-[Wiki](https://github.com/iamalnewkirk/foobar/wiki)
+[Wiki](https://github.com/iamalnewkirk/rewire/wiki)
 
-[Project](https://github.com/iamalnewkirk/foobar)
+[Project](https://github.com/iamalnewkirk/rewire)
 
-[Initiatives](https://github.com/iamalnewkirk/foobar/projects)
+[Initiatives](https://github.com/iamalnewkirk/rewire/projects)
 
-[Milestones](https://github.com/iamalnewkirk/foobar/milestones)
+[Milestones](https://github.com/iamalnewkirk/rewire/milestones)
 
-[Contributing](https://github.com/iamalnewkirk/foobar/blob/master/CONTRIBUTE.md)
+[Contributing](https://github.com/iamalnewkirk/rewire/blob/master/CONTRIBUTE.md)
 
-[Issues](https://github.com/iamalnewkirk/foobar/issues)
+[Issues](https://github.com/iamalnewkirk/rewire/issues)
