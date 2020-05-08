@@ -159,20 +159,20 @@ fun resolver(Any $argsData, HashRef $servConf, Maybe[CodeRef] $context) {
   }
 
   # $metadata
-  if (ref $argsData eq 'HASH' && keys %$argsData < 2) {
+  if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
     if ($servMeta && $argsData->{'$metadata'}) {
       $argsData = $servMeta->{$argsData->{'$metadata'}};
     }
   }
 
   # $service
-  if (ref $argsData eq 'HASH' && keys %$argsData < 2) {
+  if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
     if ($servSpec && $argsData->{'$service'}) {
       $argsData = reifier($argsData->{'$service'}, $servConf, $context);
     }
   }
 
-  if (ref $argsData eq 'HASH' && keys %$argsData > 1) {
+  if (ref $argsData eq 'HASH' && grep ref, values %$argsData) {
     @$argsData{keys %$argsData} = map resolver($_, $servConf, $context), values %$argsData;
   }
 

@@ -372,7 +372,32 @@ process(Str $name, Any $argument, Maybe[Str] $argument_as) : Any
 
   # given: synopsis
 
-  $rewire->process('tempfile', '/tmp/rewire.txt');
+  $rewire->process('tempfile', 'rewire.tmp');
+
+=example-2 process
+
+  use Rewire;
+
+  my $metadata = {
+    logfile => '/var/log/rewire.log',
+  };
+
+  my $services = {
+    mojo_log => {
+      package => 'Mojo/Log',
+      argument => { '$metadata' => 'logfile' },
+    }
+  };
+
+  my $rewire = Rewire->new(
+    services => $services,
+    metadata => $metadata
+  );
+
+  $rewire->process('mojo_log', {
+    level => 'fatal',
+    path => { '$metadata' => 'logfile' }
+  });
 
 =cut
 
@@ -549,7 +574,16 @@ $subs->example(-1, 'config', 'method', fun($tryable) {
 $subs->example(-1, 'process', 'method', fun($tryable) {
   ok my $result = $tryable->result;
   ok $result->isa('Mojo::File');
-  is $$result, '/tmp/rewire.txt';
+  is $$result, 'rewire.tmp';
+
+  $result
+});
+
+$subs->example(-2, 'process', 'method', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->isa('Mojo::Log');
+  is $result->path, '/var/log/rewire.log';
+  is $result->level, 'fatal';
 
   $result
 });
