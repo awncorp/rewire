@@ -18,6 +18,8 @@ use Rewire::Engine;
 
 with 'Data::Object::Role::Buildable';
 
+# VERSION
+
 # BUILD
 
 fun build_self($self, $args) {
