@@ -1,6 +1,13 @@
 Changelog for Rewire
 
-0.02 2020-05-08T15:39:36
+0.03 2020-05-08T20:03:12
+ - Added release updates
+ - Add VERSION token
+ - Updated documentation
+ - Fix "process" method w/single-key arg
+
+0.02 2020-05-08T15:39:37
+ - Built release version 0.02
  - Added release updates
  - Updated documentation
  - Add "process" method

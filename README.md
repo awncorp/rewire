@@ -327,7 +327,32 @@ service named but where the arguments are provided ad-hoc.
 
         # given: synopsis
 
-        $rewire->process('tempfile', '/tmp/rewire.txt');
+        $rewire->process('tempfile', 'rewire.tmp');
+
+- process example #2
+
+        use Rewire;
+
+        my $metadata = {
+          logfile => '/var/log/rewire.log',
+        };
+
+        my $services = {
+          mojo_log => {
+            package => 'Mojo/Log',
+            argument => { '$metadata' => 'logfile' },
+          }
+        };
+
+        my $rewire = Rewire->new(
+          services => $services,
+          metadata => $metadata
+        );
+
+        $rewire->process('mojo_log', {
+          level => 'fatal',
+          path => { '$metadata' => 'logfile' }
+        });
 
 ## resolve
 
