@@ -1,0 +1,206 @@
+---
+
+$id: "https://raw.githubusercontent.com/iamalnewkirk/rewire/master/ruleset.yaml"
+$schema: "https://json-schema.org/draft/2019-09/schema"
+
+# Based on https://github.com/preaction/Beam-Wire/issues/42#issuecomment-77699688
+# ... https://github.com/preaction/Beam-Wire/blob/5aa3c62fa4a93aae778c1715fcb6710206dbd170/lib/Beam/Wire/Help/Config.pod
+#
+type: object
+properties:
+  services:
+    type: object
+    patternProperties:
+      "^[A-Za-z_][A-Za-z0-9_]*$":
+        $ref: "#/definitions/Service"
+  metadata:
+    type: object
+    patternProperties:
+      "^[A-Za-z_][A-Za-z0-9_]*$":
+        $ref: "#/definitions/Argument"
+required: ["services"]
+
+definitions:
+
+  # Arugment to Package
+  #
+  Argument:
+    anyOf:
+      - $ref: "#/definitions/ArgumentNumber"
+      - $ref: "#/definitions/ArgumentString"
+      - $ref: "#/definitions/ArgumentObject"
+      - $ref: "#/definitions/ArgumentArray"
+      - $ref: "#/definitions/ArgumentBoolean"
+      - $ref: "#/definitions/ArgumentNull"
+
+  # Argument as [1..4]
+  #
+  ArgumentArray:
+    type: array
+    items:
+      $ref: "#/definitions/Argument"
+    minItems: 1
+
+  # Arugment as (...)
+  #
+  ArgumentAs:
+    enum: ["array", "hashmap", "list"]
+
+  # Argument as true/false
+  #
+  ArgumentBoolean:
+    type: boolean
+
+  # Argument as 1234
+  #
+  ArgumentNumber:
+    type: number
+    minLength: 1
+
+  # Argument as null
+  #
+  ArgumentNull:
+    type: null
+
+  # Argument as {1..4}
+  #
+  ArgumentObject:
+    type: object
+    patternProperties:
+      "^\\$[A-Za-z_][A-Za-z0-9_]*$":
+        $ref: "#/definitions/Argument"
+    minProperties: 1
+    additionalProperties: false
+
+  # Argument as '1,2,3,4'
+  #
+  ArgumentString:
+    type: string
+    minLength: 1
+
+  # Service
+  #
+  # ! Supports (PackageBasic): Package->new(@args)
+  #
+  # {
+  #   "package": "DateTime"
+  # }
+  #
+  # ! Supports (PackageConstructor): Package->$constructor(@args)
+  #
+  # {
+  #   "package": "DateTime",
+  #   "constructor": "now"
+  # }
+  #
+  # ! Supports (PackageFunction): Package::$function(@args)
+  #
+  # {
+  #   "package": "DateTime",
+  #   "function": "now"
+  # }
+  #
+  # ! Supports (PackageMethod): Package->$method(@args)
+  #
+  # {
+  #   "package": "DateTime",
+  #   "method": "from_epoch"
+  # }
+  #
+  # ! Supports (PackageRoutine): Package->$routine(@args)
+  #
+  # {
+  #   "package": "DateTime",
+  #   "routine": "now"
+  # }
+  #
+  Service:
+    type: object
+    properties:
+      package:
+        type: string
+      lifecycle:
+        enum: ["eager", "factory", "singleton"]
+      argument:
+        $ref: "#/definitions/Argument"
+      argument_as:
+        $ref: '#/definitions/ArgumentAs'
+      constructor:
+        type: string
+      function:
+        type: string
+      method:
+        type: string
+      routine:
+        type: string
+
+      # ! Supports (PackageBuilder): Package->$method(@args)->$method
+      #
+      # {
+      #   "package": "DateTime",
+      #   "builder": [
+      #     {
+      #       method => 'now',
+      #       return => 'self'
+      #     },
+      #     {
+      #       method => 'set_timezone',
+      #       return => 'none'
+      #     }
+      #   ]
+      # }
+      #
+      builder:
+        type: array
+        items:
+          type: object
+          properties:
+            argument:
+              $ref: "#/definitions/Argument"
+            argument_as:
+              $ref: '#/definitions/ArgumentAs'
+            return:
+              enum: ["class", "none", "result", "self"]
+            function:
+              type: string
+            method:
+              type: string
+            routine:
+              type: string
+
+          # EITHER-OR OF:
+          #
+          # - function
+          # - method
+          # - routine
+          #
+          anyOf:
+            - required: ["function"]
+            - required: ["method"]
+            - required: ["routine"]
+
+          required: ["return"]
+          additionalProperties: false
+          minProperties: 1
+        minItems: 1
+
+    # NEITHER OR EITHER-OR OF:
+    #
+    # - function
+    # - method
+    # - routine
+    #
+    not:
+      anyOf:
+        - required:
+          - function
+          - method
+        - required:
+          - function
+          - routine
+        - required:
+          - method
+          - routine
+    required: ["package"]
+    additionalProperties: false
+    minProperties: 1
