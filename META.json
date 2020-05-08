@@ -52,6 +52,7 @@
       "bugtracker" : {
          "web" : "https://github.com/iamalnewkirk/rewire/issues"
       },
+      "homepage" : "https://metacpan.org/pod/Rewire",
       "repository" : {
          "type" : "git",
          "url" : "git://github.com/iamalnewkirk/rewire.git",

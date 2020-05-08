@@ -1,5 +1,12 @@
 Changelog for Rewire
 
-0.01 2020-05-08T02:38:27
+0.02 2020-05-08T15:39:36
+ - Added release updates
+ - Updated documentation
+ - Add "process" method
+ - Miscellaneous Housekeeping
+
+0.01 2020-05-08T02:38:28
+ - Built release version 0.01
  - Added release updates
  - Initial commit

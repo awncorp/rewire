@@ -316,6 +316,19 @@ The config method returns the configuration based on the `services` and
 
         $rewire->config;
 
+## process
+
+    process(Str $name, Any $argument, Maybe[Str] $argument_as) : Any
+
+The process method processes and returns an object or value based on the
+service named but where the arguments are provided ad-hoc.
+
+- process example #1
+
+        # given: synopsis
+
+        $rewire->process('tempfile', '/tmp/rewire.txt');
+
 ## resolve
 
     resolve(Str $name) : Any

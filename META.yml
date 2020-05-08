@@ -34,6 +34,7 @@ requires:
   warnings: '0'
 resources:
   bugtracker: https://github.com/iamalnewkirk/rewire/issues
+  homepage: https://metacpan.org/pod/Rewire
   repository: git://github.com/iamalnewkirk/rewire.git
 version: '0.02'
 x_authority: cpan:AWNCORP
