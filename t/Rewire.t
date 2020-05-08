@@ -22,6 +22,7 @@ Dependency Injection Container for Perl 5
 =includes
 
 method: config
+method: process
 method: resolve
 method: validate
 
@@ -358,6 +359,23 @@ config() : HashRef
 
 =cut
 
+=method process
+
+The process method processes and returns an object or value based on the
+service named but where the arguments are provided ad-hoc.
+
+=signature process
+
+process(Str $name, Any $argument, Maybe[Str] $argument_as) : Any
+
+=example-1 process
+
+  # given: synopsis
+
+  $rewire->process('tempfile', '/tmp/rewire.txt');
+
+=cut
+
 =method resolve
 
 The resolve method resolves and returns an object or value based on the service
@@ -524,6 +542,14 @@ $subs->example(-1, 'config', 'method', fun($tryable) {
     },
     metadata => {}
   };
+
+  $result
+});
+
+$subs->example(-1, 'process', 'method', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->isa('Mojo::File');
+  is $$result, '/tmp/rewire.txt';
 
   $result
 });

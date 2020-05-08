@@ -75,6 +75,20 @@ method resolve(Str $name) {
   return $result;
 }
 
+method process(Str $name, Any $argument, Maybe[Str] $argument_as) {
+  my $engine = $self->engine;
+  my $service = $self->services->{$name} or return;
+
+  my $generated = {
+    %$service, $argument_as ? (argument_as => $argument_as) : ()
+  };
+
+  my $params = $engine->call('resolver', $argument, $self->config, $self->context);
+  my $result = $engine->call( 'builder', $generated, $params);
+
+  return $result;
+}
+
 method validate() {
   my $engine = $self->engine;
 
