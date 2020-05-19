@@ -195,6 +195,53 @@ fun resolver(Any $argsData, HashRef $servConf, Maybe[CodeRef] $context) {
     }
   }
 
+  # $function
+  if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
+    if ($servSpec && $argsData->{'$function'}) {
+      my ($name, $next) = split /#/, $argsData->{'$function'};
+      if ($name && $next) {
+        if (my $resolved = reifier($name, $servConf, $context)) {
+          if (Scalar::Util::blessed($resolved)
+            || (!ref($resolved) && ($resolved =~ /^[a-z-A-Z]/))) {
+            my $space = Data::Object::Space->new(ref $resolved || $resolved);
+            $argsData = $space->call($next) if $next && $next =~ /^[a-zA-Z]/;
+          }
+        }
+      }
+    }
+  }
+
+  # $method
+  if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
+    if ($servSpec && $argsData->{'$method'}) {
+      my ($name, $next) = split /#/, $argsData->{'$method'};
+      if ($name && $next) {
+        if (my $resolved = reifier($name, $servConf, $context)) {
+          if (Scalar::Util::blessed($resolved)
+            || (!ref($resolved) && ($resolved =~ /^[a-z-A-Z]/))) {
+            $argsData = $resolved->$next if $next && $next =~ /^[a-zA-Z]/;
+          }
+        }
+      }
+    }
+  }
+
+  # $routine
+  if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
+    if ($servSpec && $argsData->{'$routine'}) {
+      my ($name, $next) = split /#/, $argsData->{'$routine'};
+      if ($name && $next) {
+        if (my $resolved = reifier($name, $servConf, $context)) {
+          if (Scalar::Util::blessed($resolved)
+            || (!ref($resolved) && ($resolved =~ /^[a-z-A-Z]/))) {
+            my $space = Data::Object::Space->new(ref $resolved || $resolved);
+            $argsData = $space->call($next) if $next && $next =~ /^[a-zA-Z]/;
+          }
+        }
+      }
+    }
+  }
+
   # $service
   if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
     if ($servSpec && $argsData->{'$service'}) {

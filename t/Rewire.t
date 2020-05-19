@@ -105,6 +105,33 @@ variable, and can also be used in metadata for reusability.
 
 =cut
 
+=scenario $function
+
+This package supports inlining the result of a service resolution and function
+call as arguments to services. The C<#> delimited C<$function> directive is
+used to specify the name of an existing service on the right-hand side, and an
+arbitrary function to be call on the result on the left-hand side.
+
+=example $function
+
+  use Rewire;
+
+  my $services = {
+    temp => {
+      package => 'File/Temp'
+    },
+    file => {
+      package => 'Mojo/File',
+      argument => { '$function' => 'temp#tempfile' }
+    }
+  };
+
+  my $rewire = Rewire->new(
+    services => $services
+  );
+
+=cut
+
 =scenario $metadata
 
 This package supports inlining configuration data as arguments to services.
@@ -128,6 +155,60 @@ configuration value or data structure.
 
   my $rewire = Rewire->new(
     metadata => $metadata,
+    services => $services
+  );
+
+=cut
+
+=scenario $method
+
+This package supports inlining the result of a service resolution and method
+call as arguments to services. The C<#> delimited C<$method> directive is used
+to specify the name of an existing service on the right-hand side, and an
+arbitrary method to be call on the result on the left-hand side.
+
+=example $method
+
+  use Rewire;
+
+  my $services = {
+    temp => {
+      package => 'File/Temp'
+    },
+    file => {
+      package => 'Mojo/File',
+      argument => { '$method' => 'temp#filename' }
+    }
+  };
+
+  my $rewire = Rewire->new(
+    services => $services
+  );
+
+=cut
+
+=scenario $routine
+
+This package supports inlining the result of a service resolution and routine
+call as arguments to services. The C<#> delimited C<$routine> directive is
+used to specify the name of an existing service on the right-hand side, and an
+arbitrary routine to be call on the result on the left-hand side.
+
+=example $routine
+
+  use Rewire;
+
+  my $services = {
+    temp => {
+      package => 'File/Temp'
+    },
+    file => {
+      package => 'Mojo/File',
+      argument => { '$routine' => 'temp#tempfile' }
+    }
+  };
+
+  my $rewire = Rewire->new(
     services => $services
   );
 
@@ -660,12 +741,42 @@ $subs->scenario('$envvar', fun($tryable) {
   $result
 });
 
+$subs->scenario('$function', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->resolve('file');
+  ok $value->isa('Mojo::File');
+  ok $$value;
+
+  $result
+});
+
 $subs->scenario('$metadata', fun($tryable) {
   ok my $result = $tryable->result;
   ok $result->validate;
   ok my $value = $result->resolve('file');
   ok $value->isa('Mojo::File');
   is $$value, '/home/ubuntu';
+
+  $result
+});
+
+$subs->scenario('$method', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->resolve('file');
+  ok $value->isa('Mojo::File');
+  ok $$value;
+
+  $result
+});
+
+$subs->scenario('$routine', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->resolve('file');
+  ok $value->isa('Mojo::File');
+  ok $$value;
 
   $result
 });
