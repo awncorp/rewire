@@ -69,13 +69,22 @@ fun builder(HashRef $service, Any $argument) {
   if (my $builder = $service->{builder}) {
     my $original;
 
-    for my $buildspec (@$builder) {
+    # inject at last build step unless arguments exist
+    my @injectables = @arguments;
+
+    for (my $i=0; $i < @$builder; $i++) {
+      my $buildspec = $builder->[$i];
       my $argument = $buildspec->{argument};
       my $argument_as = $buildspec->{argument_as};
       my $return = $buildspec->{return};
 
       my $result = $construct || $space->package;
       my @arguments = arguments($argument, $argument_as);
+
+      if ($i == $#$builder) {
+        # on last build step if no build step arguments
+        @arguments = @injectables if not exists $buildspec->{argument};
+      }
 
       if (my $function = $buildspec->{function}) {
         $result = $space->call($function, @arguments);

@@ -486,6 +486,36 @@ process(Str $name, Any $argument, Maybe[Str] $argument_as) : Any
     path => { '$metadata' => 'logfile' }
   });
 
+=example-3 process
+
+  use Rewire;
+
+  my $metadata = {
+    logfile => '/var/log/rewire.log',
+  };
+
+  my $services = {
+    mojo_log => {
+      package => 'Mojo/Log',
+      builder => [
+        {
+          method => 'new',
+          return => 'self'
+        }
+      ]
+    }
+  };
+
+  my $rewire = Rewire->new(
+    services => $services,
+    metadata => $metadata
+  );
+
+  $rewire->process('mojo_log', {
+    level => 'fatal',
+    path => { '$metadata' => 'logfile' }
+  });
+
 =cut
 
 =method resolve
@@ -721,6 +751,15 @@ $subs->example(-1, 'process', 'method', fun($tryable) {
 });
 
 $subs->example(-2, 'process', 'method', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->isa('Mojo::Log');
+  is $result->path, '/var/log/rewire.log';
+  is $result->level, 'fatal';
+
+  $result
+});
+
+$subs->example(-3, 'process', 'method', fun($tryable) {
   ok my $result = $tryable->result;
   ok $result->isa('Mojo::Log');
   is $result->path, '/var/log/rewire.log';
