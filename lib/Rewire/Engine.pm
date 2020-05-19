@@ -54,12 +54,10 @@ fun preload(HashRef $servConf, Maybe[CodeRef] $context) {
 }
 
 # builds and returns object or value based on spec
-fun builder(HashRef $service, Any $argument) {
-  my $construct;
-
-  # build namespace object
+fun builder(HashRef $service, Any $argument, Maybe[Object] $construct) {
   my $space = Data::Object::Space->new($service->{package});
 
+  # load declared package
   $space->load;
 
   # determine how to pass arguments (if any)
@@ -135,6 +133,7 @@ fun reifier(Str $servName, HashRef $servConf, Maybe[CodeRef] $context) {
 
   my $value;
   my $service;
+  my $extended;
 
   my $servSpec = $servConf->{services};
 
@@ -145,8 +144,15 @@ fun reifier(Str $servName, HashRef $servConf, Maybe[CodeRef] $context) {
 
   $service = $servSpec->{$servName} or return;
 
+  # extend existing service (if requested)
+  if (my $extends = $service->{extends}) {
+    $extended = reifier($extends, $servConf, $context);
+  }
+
   # build object or value
-  $value = builder($service, resolver($service->{argument}, $servConf, $context));
+  my $arguments = resolver($service->{argument}, $servConf, $context);
+
+  $value = builder($service, $arguments, $extended);
 
   # determine cachability
   my $lifecycle = $service->{lifecycle};

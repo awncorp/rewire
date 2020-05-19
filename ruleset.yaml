@@ -119,6 +119,8 @@ definitions:
     properties:
       package:
         type: string
+      extends:
+        type: string
       lifecycle:
         enum: ["eager", "factory", "singleton"]
       argument:

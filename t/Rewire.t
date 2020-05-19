@@ -188,6 +188,66 @@ building objects and values.
 
 =cut
 
+=scenario extends
+
+This package supports extending services in the definition of other services,
+effectively using the extended service as the invocant in the creation of the
+requested service.
+
+=example extends
+
+  use Rewire;
+
+  my $services = {
+    io => {
+      package => 'IO/Handle'
+    },
+    log => {
+      package => 'Mojo/Log',
+      argument => {
+        handle => { '$service' => 'io' }
+      }
+    },
+    development_log => {
+      package => 'Mojo/Log',
+      extends => 'log',
+      builder => [
+        {
+          method => 'path',
+          argument => '/tmp/development.log',
+          return => 'none'
+        },
+        {
+          method => 'level',
+          argument => 'debug',
+          return => 'none'
+        }
+      ]
+    },
+    production_log => {
+      package => 'Mojo/Log',
+      extends => 'log',
+      builder => [
+        {
+          method => 'path',
+          argument => '/tmp/production.log',
+          return => 'none'
+        },
+        {
+          method => 'level',
+          argument => 'warn',
+          return => 'none'
+        }
+      ]
+    },
+  };
+
+  my $rewire = Rewire->new(
+    services => $services
+  );
+
+=cut
+
 =scenario service
 
 This package supports defining services to be constructed on-demand or
@@ -626,6 +686,27 @@ $subs->scenario('config', fun($tryable) {
   ok my $value = $result->resolve('tempfile');
   ok $value->isa('Mojo::File');
   is $$value, '/home/ubuntu';
+
+  $result
+});
+
+$subs->scenario('extends', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+
+  my $value;
+
+  ok $value = $result->resolve('development_log');
+  ok $value->isa('Mojo::Log');
+  ok $value->handle->isa('IO::Handle');
+  is $value->level, 'debug';
+  is $value->path, '/tmp/development.log';
+
+  ok $value = $result->resolve('production_log');
+  ok $value->isa('Mojo::Log');
+  ok $value->handle->isa('IO::Handle');
+  is $value->level, 'warn';
+  is $value->path, '/tmp/production.log';
 
   $result
 });
