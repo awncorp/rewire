@@ -165,6 +165,21 @@ fun resolver(Any $argsData, HashRef $servConf, Maybe[CodeRef] $context) {
     }
   }
 
+  # $envvar
+  if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
+    if (my $envvar = $argsData->{'$envvar'}) {
+      if (exists $ENV{$envvar}) {
+        $argsData = $ENV{$envvar};
+      }
+      elsif (exists $ENV{uc($envvar)}) {
+        $argsData = $ENV{uc($envvar)};
+      }
+      else {
+        $argsData = undef;
+      }
+    }
+  }
+
   # $service
   if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
     if ($servSpec && $argsData->{'$service'}) {

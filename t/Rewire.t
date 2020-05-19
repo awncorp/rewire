@@ -82,6 +82,85 @@ objects and values.
 
 =cut
 
+=scenario $envvar
+
+This package supports inlining environment variables as arguments to services.
+The C<$envvar> directive is used to specify the name of an environment
+variable, and can also be used in metadata for reusability.
+
+=example $envvar
+
+  use Rewire;
+
+  my $services = {
+    file => {
+      package => 'Mojo/File',
+      argument => { '$envvar' => 'home' }
+    }
+  };
+
+  my $rewire = Rewire->new(
+    services => $services
+  );
+
+=cut
+
+=scenario $metadata
+
+This package supports inlining configuration data as arguments to services.
+The C<$metadata> directive is used to specify the name of a stashed
+configuration value or data structure.
+
+=example $metadata
+
+  use Rewire;
+
+  my $metadata = {
+    home => '/home/ubuntu'
+  };
+
+  my $services = {
+    file => {
+      package => 'Mojo/File',
+      argument => { '$metadata' => 'home' }
+    }
+  };
+
+  my $rewire = Rewire->new(
+    metadata => $metadata,
+    services => $services
+  );
+
+=cut
+
+=scenario $service
+
+This package supports inlining resolved services as arguments to other
+services. The C<$service> directive is used to specify the name of a service
+to be resolved and passed as an argument.
+
+=example $service
+
+  use Rewire;
+
+  my $services = {
+    io => {
+      package => 'IO/Handle'
+    },
+    log => {
+      package => 'Mojo/Log',
+      argument => {
+        handle => { '$service' => 'io' }
+      }
+    },
+  };
+
+  my $rewire = Rewire->new(
+    services => $services
+  );
+
+=cut
+
 =scenario config
 
 This package supports configuring services and metadata in the service of
@@ -475,6 +554,38 @@ $subs->synopsis(fun($tryable) {
   ok my $result = $tryable->result;
   ok $result->isa('Mojo::File');
   ok $$result->isa('File::Temp');
+
+  $result
+});
+
+$subs->scenario('$envvar', fun($tryable) {
+  local $ENV{HOME} = '/home/ubuntu';
+
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->resolve('file');
+  ok $value->isa('Mojo::File');
+  is $$value, '/home/ubuntu';
+
+  $result
+});
+
+$subs->scenario('$metadata', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->resolve('file');
+  ok $value->isa('Mojo::File');
+  is $$value, '/home/ubuntu';
+
+  $result
+});
+
+$subs->scenario('$service', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->resolve('log');
+  ok $value->isa('Mojo::Log');
+  ok $value->handle->isa('IO::Handle');
 
   $result
 });
