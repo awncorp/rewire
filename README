@@ -432,26 +432,26 @@ SCENARIOS
 
       use Rewire;
     
-      my $metadata = {
-        homedir => '/home',
-        tempdir => '/tmp'
-      };
-    
       my $services = {
         home => {
           package => 'Mojo/Path',
-          argument => { '$metadata' => 'homedir' },
+          argument => '/home',
         },
         temp => {
           package => 'Mojo/Path',
-          argument => { '$metadata' => 'tempdir' },
+          argument => '/tmp',
         }
       };
     
       my $rewire = Rewire->new(
-        services => $services,
-        metadata => $metadata
+        services => $services
       );
+    
+      # resolve services via method calls
+      [
+        $rewire->home, # i.e. $rewire->process('home')
+        $rewire->temp  # i.e. $rewire->process('temp')
+      ]
 
     This package supports the resolution of services using a single method
     call. This is enabled by intercepting method calls and proxying them to
