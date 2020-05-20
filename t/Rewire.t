@@ -696,6 +696,46 @@ resolve(Str $name) : Any
 
   $rewire->resolve('mojo_log');
 
+=example-3 resolve
+
+  package Dynamic;
+
+  sub import;
+
+  sub AUTOLOAD {
+    bless {};
+  }
+
+  sub DESTROY {
+    ; # noop
+  }
+
+  package main;
+
+  use Rewire;
+
+  my $services = {
+    dynamic => {
+      package => 'Dynamic',
+      builder => [
+        {
+          method => 'new',
+          return => 'self'
+        },
+        {
+          method => 'missing_method',
+          return => 'result'
+        }
+      ],
+    }
+  };
+
+  my $rewire = Rewire->new(
+    services => $services,
+  );
+
+  $rewire->resolve('dynamic');
+
 =cut
 
 =method validate
@@ -973,6 +1013,13 @@ $subs->example(-2, 'resolve', 'method', fun($tryable) {
   ok $result->isa('Mojo::Log');
   is $result->path, '/var/log/rewire.log';
   is $result->level, 'fatal';
+
+  $result
+});
+
+$subs->example(-3, 'resolve', 'method', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->isa('Dynamic');
 
   $result
 });
