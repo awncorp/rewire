@@ -63,6 +63,7 @@ Types::Standard
 =integrates
 
 Data::Object::Role::Buildable
+Data::Object::Role::Proxyable
 
 =cut
 
@@ -568,6 +569,39 @@ construction of multiple services.
 
 =cut
 
+=scenario proxyable
+
+This package supports the resolution of services using a single method call.
+This is enabled by intercepting method calls and proxying them to the
+L</process> method.
+
+=example proxyable
+
+  use Rewire;
+
+  my $metadata = {
+    homedir => '/home',
+    tempdir => '/tmp'
+  };
+
+  my $services = {
+    home => {
+      package => 'Mojo/Path',
+      argument => { '$metadata' => 'homedir' },
+    },
+    temp => {
+      package => 'Mojo/Path',
+      argument => { '$metadata' => 'tempdir' },
+    }
+  };
+
+  my $rewire = Rewire->new(
+    services => $services,
+    metadata => $metadata
+  );
+
+=cut
+
 =method config
 
 The config method returns the configuration based on the C<services> and
@@ -950,6 +984,19 @@ $subs->scenario('metadata', fun($tryable) {
   ok $value->isa('Mojo::Path');
   is $value->{path}, '/home';
   ok $value = $result->resolve('temp');
+  ok $value->isa('Mojo::Path');
+  is $value->{path}, '/tmp';
+
+  $result
+});
+
+$subs->scenario('proxyable', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->home;
+  ok $value->isa('Mojo::Path');
+  is $value->{path}, '/home';
+  ok $value = $result->temp;
   ok $value->isa('Mojo::Path');
   is $value->{path}, '/tmp';
 

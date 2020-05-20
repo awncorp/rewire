@@ -17,13 +17,25 @@ use JSON::Validator;
 use Rewire::Engine;
 
 with 'Data::Object::Role::Buildable';
+with 'Data::Object::Role::Proxyable';
 
 # VERSION
 
 # BUILD
 
 fun build_self($self, $args) {
-  $self->context; # build context and eager load
+
+  # build context and eager load services
+  return $self->context;
+}
+
+fun build_proxy($self, $package, $method, @args) {
+  return unless $self->config->{services}{$method};
+
+  return sub {
+
+    return $self->process($method, @args);
+  }
 }
 
 # ATTRIBUTES
@@ -85,8 +97,10 @@ method process(Str $name, Any $argument, Maybe[Str] $argument_as) {
     %$service, $argument_as ? (argument_as => $argument_as) : ()
   };
 
+ $argument //= $service->{argument};
+
   my $params = $engine->call('resolver', $argument, $self->config, $self->context);
-  my $result = $engine->call( 'builder', $generated, $params);
+  my $result = $engine->call( 'builder', $generated, $params // $service->{argument});
 
   return $result;
 }
