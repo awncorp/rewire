@@ -579,26 +579,26 @@ L</process> method.
 
   use Rewire;
 
-  my $metadata = {
-    homedir => '/home',
-    tempdir => '/tmp'
-  };
-
   my $services = {
     home => {
       package => 'Mojo/Path',
-      argument => { '$metadata' => 'homedir' },
+      argument => '/home',
     },
     temp => {
       package => 'Mojo/Path',
-      argument => { '$metadata' => 'tempdir' },
+      argument => '/tmp',
     }
   };
 
   my $rewire = Rewire->new(
-    services => $services,
-    metadata => $metadata
+    services => $services
   );
+
+  # resolve services via method calls
+  [
+    $rewire->home, # i.e. $rewire->process('home')
+    $rewire->temp  # i.e. $rewire->process('temp')
+  ]
 
 =cut
 
@@ -992,13 +992,11 @@ $subs->scenario('metadata', fun($tryable) {
 
 $subs->scenario('proxyable', fun($tryable) {
   ok my $result = $tryable->result;
-  ok $result->validate;
-  ok my $value = $result->home;
-  ok $value->isa('Mojo::Path');
-  is $value->{path}, '/home';
-  ok $value = $result->temp;
-  ok $value->isa('Mojo::Path');
-  is $value->{path}, '/tmp';
+  my ($home, $temp) = @$result;
+  ok $home->isa('Mojo::Path');
+  is $home->{path}, '/home';
+  ok $temp->isa('Mojo::Path');
+  is $temp->{path}, '/tmp';
 
   $result
 });
