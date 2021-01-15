@@ -83,6 +83,34 @@ objects and values.
 
 =cut
 
+=scenario $callback
+
+This package supports resolving services as callbacks to be passed around
+and/or resolved by other services. The C<$callback> directive is used to
+specify the name of a service to be resolved and passed as an argument.
+
+=example $callback
+
+  use Rewire;
+
+  my $services = {
+    io => {
+      package => 'IO/Handle'
+    },
+    log => {
+      package => 'Mojo/Log',
+      argument => {
+        format => { '$callback' => 'io' }
+      }
+    },
+  };
+
+  my $rewire = Rewire->new(
+    services => $services
+  );
+
+=cut
+
 =scenario $envvar
 
 This package supports inlining environment variables as arguments to services.
@@ -815,6 +843,19 @@ $subs->synopsis(fun($tryable) {
   ok my $result = $tryable->result;
   ok $result->isa('Mojo::File');
   ok $$result->isa('File::Temp');
+
+  $result
+});
+
+$subs->scenario('$callback', fun($tryable) {
+  ok my $result = $tryable->result;
+  ok $result->validate;
+  ok my $value = $result->resolve('log');
+  ok $value->isa('Mojo::Log');
+  my $format = $value->format;
+  ok ref($format) eq 'CODE';
+  my $io = $format->();
+  ok $io->isa('IO::Handle');
 
   $result
 });

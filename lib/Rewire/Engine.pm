@@ -282,6 +282,13 @@ fun resolver(Any $argsData, HashRef $servConf, Maybe[CodeRef] $context) {
     }
   }
 
+  # $callback
+  if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
+    if ($servSpec && (my $callback = $argsData->{'$callback'})) {
+      $argsData = sub { reifier($callback, $servConf, $context) };
+    }
+  }
+
   # $service
   if (ref $argsData eq 'HASH' && (keys %$argsData) == 1) {
     if ($servSpec && $argsData->{'$service'}) {
