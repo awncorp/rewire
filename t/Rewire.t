@@ -273,8 +273,8 @@ building objects and values.
 =scenario extends
 
 This package supports extending services in the definition of other services,
-effectively using the extended service as the invocant in the creation of the
-requested service.
+recursively compiling service configurations and eventually executing the
+requested compiled service.
 
 =example extends
 
@@ -295,6 +295,10 @@ requested service.
       extends => 'log',
       builder => [
         {
+          method => 'new',
+          return => 'self'
+        },
+        {
           method => 'path',
           argument => '/tmp/development.log',
           return => 'none'
@@ -311,6 +315,10 @@ requested service.
       extends => 'log',
       builder => [
         {
+          method => 'new',
+          return => 'self'
+        },
+        {
           method => 'path',
           argument => '/tmp/production.log',
           return => 'none'
@@ -321,6 +329,14 @@ requested service.
           return => 'none'
         }
       ]
+    },
+    staging_log => {
+      package => 'Mojo/Log',
+      extends => 'development_log',
+    },
+    testing_log => {
+      package => 'Mojo/Log',
+      extends => 'log',
     },
   };
 
@@ -892,6 +908,18 @@ $subs->scenario('extends', fun($tryable) {
   ok $value->handle->isa('IO::Handle');
   is $value->level, 'warn';
   is $value->path, '/tmp/production.log';
+
+  ok $value = $result->resolve('staging_log');
+  ok $value->isa('Mojo::Log');
+  ok $value->handle->isa('IO::Handle');
+  is $value->level, 'debug';
+  is $value->path, '/tmp/development.log';
+
+  ok $value = $result->resolve('testing_log');
+  ok $value->isa('Mojo::Log');
+  ok $value->handle->isa('IO::Handle');
+  is $value->level, 'debug';
+  ok !$value->path;
 
   $result
 });
